@@ -7,7 +7,7 @@ import Button from "../components/Button";
 import Toast from "../components/Toast";
 import { useTasks } from "../context/TaskProvider";
 
-export default function TaskForm({ editTask = null, onClose }) {
+export default function TaskForm({ editTask, onClose }) {
   const { addTask, updateTask } = useTasks();
 
   const isEdit = Boolean(editTask);
@@ -22,18 +22,19 @@ export default function TaskForm({ editTask = null, onClose }) {
   const [toast, setToast] = useState("");
   const [loading, setLoading] = useState(false);
 
-  /** Load edit task data */
+  // Load edit task values
   useEffect(() => {
     if (isEdit && editTask) {
       setForm({
         title: editTask.title,
         description: editTask.description,
-        status: editTask.status,
+        status: editTask.status || "pending",
       });
     }
   }, [isEdit, editTask]);
 
-  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const onChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const validate = () => {
     const e = {};
@@ -52,7 +53,10 @@ export default function TaskForm({ editTask = null, onClose }) {
 
     try {
       if (isEdit) {
-        updateTask({ id: editTask.id, ...form });
+        updateTask({
+          id: editTask.id,
+          ...form,
+        });
         setToast("Task updated");
       } else {
         addTask({
@@ -66,7 +70,7 @@ export default function TaskForm({ editTask = null, onClose }) {
         setLoading(false);
         onClose && onClose();
       }, 300);
-    } catch (err) {
+    } catch (error) {
       setLoading(false);
       setToast("Failed to save task");
     }
@@ -96,17 +100,14 @@ export default function TaskForm({ editTask = null, onClose }) {
           error={errors.description}
           placeholder="Describe the task"
         />
-
+        
         <StatusSelector
           value={form.status}
           onChange={(v) => setForm({ ...form, status: v })}
         />
 
         <div className="flex flex-col gap-3">
-          <Button
-            loading={loading}
-            loadingText={isEdit ? "Saving changes..." : "Creating task..."}
-          >
+          <Button loading={loading} loadingText={isEdit ? "Saving..." : "Creating..."}>
             {isEdit ? "Save Changes" : "Create Task"}
           </Button>
 
