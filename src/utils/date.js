@@ -1,0 +1,1 @@
+export const formatRelative = (iso) => { const d = new Date(iso); return d.toLocaleString(); };
