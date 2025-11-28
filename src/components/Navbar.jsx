@@ -11,7 +11,6 @@ export default function Navbar() {
         <Link to="/" className="font-bold text-lg">Task Manager</Link>
 
         <div className="flex items-center gap-4">
-          {/* Theme Button */}
           <button
             onClick={() => document.documentElement.classList.toggle("dark")}
             className="px-3 py-1 rounded border dark:border-gray-600"
@@ -20,9 +19,8 @@ export default function Navbar() {
             Theme
           </button>
 
-          {/* Simple Add Task */}
           <button
-            onClick={() => openTaskModal(null)} 
+            onClick={() => openTaskModal()} 
             className="px-3 py-1 bg-blue-600 text-white rounded"
           >
             Add Task

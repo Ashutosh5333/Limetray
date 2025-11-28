@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Card from "../components/ui/Card";
-import TextInput from "../components/ui/TextInput";
-import TextArea from "../components/ui/TextArea";
-import StatusSelector from "../components/ui/StatusSelector";
+import {TextInput} from "../components/ui/TextInput";
+import {TextArea} from "../components/ui/TextArea";
+import {StatusSelector} from "../components/ui/StatusSelector";
 import Button from "../components/Button";
-import Toast from "../components/Toast";
+import {Toast} from "../components/Toast";
 import { useTasks } from "../context/TaskProvider";
 
 export default function TaskForm({ editTask, onClose }) {
@@ -60,7 +60,7 @@ export default function TaskForm({ editTask, onClose }) {
         setToast("Task updated");
       } else {
         addTask({
-          id: Date.now(),
+          id: String(Date.now()),
           ...form,
         });
         setToast("Task created");
@@ -71,6 +71,7 @@ export default function TaskForm({ editTask, onClose }) {
         onClose && onClose();
       }, 300);
     } catch (error) {
+      console.error("Task save failed:", error);
       setLoading(false);
       setToast("Failed to save task");
     }
@@ -100,7 +101,7 @@ export default function TaskForm({ editTask, onClose }) {
           error={errors.description}
           placeholder="Describe the task"
         />
-        
+
         <StatusSelector
           value={form.status}
           onChange={(v) => setForm({ ...form, status: v })}

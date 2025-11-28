@@ -1,21 +1,23 @@
 import Navbar from "./components/Navbar";
 import TaskForm from "./pages/TaskForm";
-import TaskList from "./components/TaskList";
 import { TaskProvider } from "./context/TaskProvider";
 import { UIProvider, useUI } from "./context/UIProvider";
-import ModalWrapper from "./components/modal/ModalWrapper";
+import {ModalWrapper} from "./components/modal/ModalWrapper";
 import TaskBoard from "./components/TaskBoard";
 
 function AppContent() {
-  const { taskModalOpen, closeTaskModal, editTask } = useUI();
+  const { taskModalOpen, closeTaskModal, editTask, openTaskModal } = useUI();
+
+  const AppNavbar = () => <Navbar openTaskModal={openTaskModal} />;
+
+  //  console.log("taskModalOpen=====>",taskModalOpen)
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Navbar />
+      <AppNavbar />
 
-      <div className="p-2 max-w-6xl mx-auto">
-        {/* <TaskList /> */}
-        <TaskBoard/>
+      <div className="p-4 max-w-6xl mx-auto">
+        <TaskBoard />
       </div>
 
       {taskModalOpen && (

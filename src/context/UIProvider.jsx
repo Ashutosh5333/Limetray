@@ -1,12 +1,11 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useMemo } from "react";
 
 const UIContext = createContext(null);
-
 export const useUI = () => useContext(UIContext);
 
-export function UIProvider({ children }) {
+export  function UIProvider({ children }) {
   const [taskModalOpen, setTaskModalOpen] = useState(false);
-  const [editTask, setEditTask] = useState(null); // holds task data when editing
+  const [editTask, setEditTask] = useState(null);
 
   const openTaskModal = useCallback((task = null) => {
     setEditTask(task);
@@ -18,9 +17,12 @@ export function UIProvider({ children }) {
     setEditTask(null);
   }, []);
 
-  return (
-    <UIContext.Provider value={{ taskModalOpen, openTaskModal, closeTaskModal, editTask }}>
-      {children}
-    </UIContext.Provider>
-  );
+  const value = useMemo(() => ({
+    taskModalOpen,
+    editTask,
+    openTaskModal,
+    closeTaskModal,
+  }), [taskModalOpen, editTask, openTaskModal, closeTaskModal]);
+
+  return <UIContext.Provider value={value}>{children}</UIContext.Provider>;
 }

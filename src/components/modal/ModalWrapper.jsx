@@ -1,14 +1,22 @@
-export default function ModalWrapper({ children, onClose }) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div
-          className="absolute inset-0 bg-black/40 backdrop-blur-md"
-          onClick={onClose}
-        />
-        <div className="relative z-50 w-full max-w-2xl mx-4 animate-fadeIn">
-          {children}
-        </div>
-      </div>
-    );
-  }
-  
+import { FiX } from "react-icons/fi";
+
+export const ModalWrapper = ({ children, onClose }) => (
+  <div
+    className="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center p-4 z-50"
+    onClick={onClose}
+  >
+    <div
+      className="relative w-full max-w-md max-h-[90vh] overflow-y-auto"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {children}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 text-white hover:text-gray-200 p-2 rounded-full transition-colors"
+        aria-label="Close"
+      >
+        <FiX size={24} />
+      </button>
+    </div>
+  </div>
+);

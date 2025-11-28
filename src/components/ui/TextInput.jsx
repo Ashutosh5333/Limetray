@@ -1,31 +1,19 @@
-export default function TextInput({
-    label,
-    name,
-    value,
-    onChange,
-    error,
-    disabled,
-    placeholder,
-  }) {
-    return (
-      <div className="space-y-1">
-        <label className="font-medium">{label}</label>
-        <input
-          name={name}
-          disabled={disabled}
-          value={value}
-          placeholder={placeholder}
-          onChange={onChange}
-          className="
-            w-full px-4 py-3 rounded-xl
-            bg-white/60 dark:bg-gray-800/60
-            border border-gray-300 dark:border-gray-600
-            focus:ring-2 focus:ring-blue-500
-            outline-none transition
-          "
-        />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-      </div>
-    );
-  }
-  
+export const TextInput = ({ label, name, value, onChange, error, placeholder }) => (
+  <div className="space-y-1">
+    <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      {label}
+    </label>
+    <input
+      id={name}
+      name={name}
+      type="text"
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className={`w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+        error ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+      }`}
+    />
+    {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+  </div>
+);

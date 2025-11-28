@@ -1,41 +1,30 @@
-export default function StatusSelector({ value, onChange, disabled }) {
-    return (
-      <div className="space-y-2">
-        <label className="font-medium">Status</label>
-        <div className="flex items-center gap-3">
+export const StatusSelector = ({ value, onChange }) => {
+  const options = [
+    { label: "Pending", value: "pending", color: "text-yellow-600 border-yellow-300 bg-yellow-50 dark:bg-yellow-900/50 dark:text-yellow-300" },
+    { label: "Completed", value: "completed", color: "text-green-600 border-green-300 bg-green-50 dark:bg-green-900/50 dark:text-green-300" },
+  ];
+
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        Status
+      </label>
+      <div className="flex gap-3">
+        {options.map((option) => (
           <button
+            key={option.value}
             type="button"
-            disabled={disabled}
-            onClick={() => onChange("pending")}
+            onClick={() => onChange(option.value)}
             className={`
-            px-5 py-2 rounded-full border text-sm transition
-            ${
-              value === "pending"
-                ? "bg-orange-500 text-white border-orange-500 shadow-md"
-                : "border-gray-300 dark:border-gray-600"
-            }
-          `}
+              px-3 py-1 text-sm font-medium rounded-full border 
+              ${option.value === value ? option.color + " ring-2 ring-offset-2 ring-blue-500/50" : "text-gray-500 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"}
+              transition-all
+            `}
           >
-            Pending
+            {option.label}
           </button>
-  
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => onChange("completed")}
-            className={`
-            px-5 py-2 rounded-full border text-sm transition
-            ${
-              value === "completed"
-                ? "bg-green-600 text-white border-green-600 shadow-md"
-                : "border-gray-300 dark:border-gray-600"
-            }
-          `}
-          >
-            Completed
-          </button>
-        </div>
+        ))}
       </div>
-    );
-  }
-  
+    </div>
+  );
+};

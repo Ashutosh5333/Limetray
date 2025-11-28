@@ -85,7 +85,7 @@ export default function TaskList() {
             </Droppable>
           </DragDropContext>
         ) : (
-          // no drag in filtered mode
+        
           <div>
             {filteredTasks.length === 0 ? (
               <p className="text-center text-gray-500 dark:text-gray-400 py-6">
