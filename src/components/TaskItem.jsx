@@ -1,41 +1,33 @@
 import React, { memo } from "react";
-import { Pencil, Trash2, GripVertical } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useUI } from "../context/UIProvider";
 
 const TaskItem = memo(function TaskItem({
   task,
   onToggle,
   onDelete,
-  onDragStart,
-  onDragEnter,
   isDragging,
-  isOver
 }) {
   const { openTaskModal } = useUI();
 
   return (
     <div
-      id={`task-${task.id}`}
-      draggable="true"
-      onDragStart={onDragStart}
-      onDragEnter={onDragEnter}
-      className={`
-        group flex flex-col gap-3 p-4 rounded-xl shadow-sm 
-        bg-white dark:bg-gray-800 border 
-        hover:shadow-md transition-all duration-200 cursor-grab
-        ${isDragging ? 'opacity-30 border-dashed border-4 border-blue-400' : 'border-gray-200 dark:border-gray-700'}
-        ${isOver ? 'border-4 border-red-500' : ''}
-      `}
       onClick={() => openTaskModal(task)}
+      className={`
+        group flex flex-col gap-3 p-4 rounded-xl border 
+        bg-white dark:bg-gray-800 select-none cursor-grab
+        transition-all duration-200 ease-out shadow-sm
+        ${isDragging ? "opacity-70 scale-[1.01]" : "hover:shadow-md hover:scale-[1.01]"}
+      `}
     >
       <div className="flex items-center justify-between">
         <span
           className={`
-            text-xs px-2 py-1 rounded-full font-medium
+            text-xs px-2 py-1 rounded-full font-semibold
             ${
               task.status === "completed"
-                ? "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
-                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300"
+                ? "bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-300"
+                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/60 dark:text-yellow-300"
             }
           `}
         >
@@ -44,19 +36,19 @@ const TaskItem = memo(function TaskItem({
       </div>
 
       <div className="flex items-start gap-3">
-        <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
+        <div onClick={(e) => e.stopPropagation()}>
           <input
             type="checkbox"
             checked={task.status === "completed"}
             onChange={onToggle}
-            className="w-4 h-4 accent-blue-600 cursor-pointer"
+            className="w-4 h-4 accent-brand-500 cursor-pointer"
           />
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1">
           <p
             className={`
-              font-semibold text-gray-900 dark:text-gray-100 break-words
+              font-semibold text-gray-900 dark:text-gray-100 leading-snug
               ${task.status === "completed" ? "line-through opacity-60" : ""}
             `}
           >
@@ -64,22 +56,32 @@ const TaskItem = memo(function TaskItem({
           </p>
 
           {task.description && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 break-words">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
               {task.description}
             </p>
           )}
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 transition-all">
+      <div className="flex justify-end">
         <button
           onClick={(e) => {
             e.stopPropagation();
             onDelete();
           }}
-          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-gray-700 transition-colors"
+          className="
+            p-2 rounded-lg transition-all 
+            hover:bg-red-50 dark:hover:bg-gray-700 
+            hover:scale-[1.08] active:scale-[0.95]
+          "
         >
-          <Trash2 className="text-red-600 dark:text-red-400" size={18} />
+          <Trash2
+            className="
+              text-red-500 dark:text-red-400 
+              group-hover:scale-110 transition-transform
+            "
+            size={18}
+          />
         </button>
       </div>
     </div>

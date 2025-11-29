@@ -10,7 +10,6 @@ function AppContent() {
 
   const AppNavbar = () => <Navbar openTaskModal={openTaskModal} />;
 
-  //  console.log("taskModalOpen=====>",taskModalOpen)
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">

@@ -1,160 +1,199 @@
 import React, { useMemo, useState, useCallback } from "react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useTasks } from "../context/TaskProvider";
 import TaskItem from "./TaskItem";
+import { List, Clock, CheckCircle2 } from "lucide-react";
 
 export default function TaskBoard() {
   const { tasks, toggleTask, deleteTask, reorderTasks } = useTasks();
-  const [draggedId, setDraggedId] = useState(null);
-  const [dragOverId, setDragOverId] = useState(null);
+  const [filter, setFilter] = useState("all");
 
-  const columns = useMemo(
-    () => ({
+  const filterIcons = {
+    all: <List className="w-4 h-4" />,
+    pending: <Clock className="w-4 h-4" />,
+    completed: <CheckCircle2 className="w-4 h-4" />,
+  };
+
+  const columns = useMemo(() => {
+    if (filter === "all") return { all: tasks };
+    return {
       pending: tasks.filter((t) => t.status === "pending"),
       completed: tasks.filter((t) => t.status === "completed"),
-    }),
-    [tasks]
-  );
+    };
+  }, [tasks, filter]);
 
-  const columnStatuses = ["pending", "completed"];
+  const onDragEnd = useCallback(
+    (result) => {
+      const { source, destination, draggableId } = result;
+      if (!destination) return;
 
-  const handleDragStart = useCallback((e, task) => {
-    e.dataTransfer.setData("taskId", task.id);
-    e.dataTransfer.setData("sourceStatus", task.status);
-    setDraggedId(task.id);
-  }, []);
+      if (filter === "all") {
+        const arr = [...tasks];
+        const [moved] = arr.splice(source.index, 1);
+        arr.splice(destination.index, 0, moved);
+        reorderTasks(arr);
+        return;
+      }
 
-  const handleDragEnd = useCallback(() => {
-    setDraggedId(null);
-    setDragOverId(null);
-  }, []);
+      const srcCol = source.droppableId;
+      const destCol = destination.droppableId;
 
-  const handleDragEnter = useCallback((e, taskId) => {
-    e.preventDefault();
-    setDragOverId(taskId);
-  }, []);
-
-  const handleDragOver = useCallback((e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  }, []);
-
-  const handleDrop = useCallback(
-    (e, targetStatus, targetOverId) => {
-      e.preventDefault();
-      setDraggedId(null);
-      setDragOverId(null);
-
-      const sourceId = e.dataTransfer.getData("taskId");
-      const sourceStatus = e.dataTransfer.getData("sourceStatus");
-
-      if (!sourceId || sourceId === targetOverId) return;
-
-      const sourceTask = tasks.find((t) => String(t.id) === String(sourceId));
+      const sourceTask = tasks.find((t) => String(t.id) === String(draggableId));
       if (!sourceTask) return;
 
-      let newTasks = tasks.filter((t) => String(t.id) !== String(sourceId));
+      if (srcCol === destCol) {
+        const colItems = tasks.filter((t) => t.status === srcCol);
+        const newCol = [...colItems];
 
-      let updatedTask = { ...sourceTask };
+        const [moved] = newCol.splice(source.index, 1);
+        newCol.splice(destination.index, 0, moved);
 
-      const statusChanged = sourceStatus !== targetStatus;
-      if (statusChanged) {
-        updatedTask.status = targetStatus;
+        let pointer = 0;
+        const final = tasks.map((t) => {
+          if (t.status === srcCol) return newCol[pointer++];
+          return t;
+        });
+
+        reorderTasks(final);
+        return;
       }
 
-      const targetList = newTasks.filter((t) => t.status === targetStatus);
+      const withoutSource = tasks.filter((t) => String(t.id) !== String(draggableId));
+      const updated = { ...sourceTask, status: destCol };
+      const destItems = withoutSource.filter((t) => t.status === destCol);
 
-      let insertionIndex = 0;
-      if (targetOverId) {
-        const targetIndexInList = targetList.findIndex(
-          (t) => String(t.id) === String(targetOverId)
-        );
-        if (targetIndexInList !== -1) {
-          insertionIndex = targetIndexInList;
-        } else {
-          insertionIndex = targetList.length;
-        }
+      let insertIndex = 0;
+
+      if (destination.index >= destItems.length) {
+        const lastDest = destItems[destItems.length - 1];
+        const lastIndex = withoutSource.findIndex((t) => t.id === lastDest?.id);
+        insertIndex = lastIndex + 1;
       } else {
-        insertionIndex = targetList.length;
+        const beforeDest = destItems[destination.index];
+        insertIndex = withoutSource.findIndex((t) => t.id === beforeDest.id);
       }
 
-      targetList.splice(insertionIndex, 0, updatedTask);
-
-      const otherStatus =
-        targetStatus === "pending" ? "completed" : "pending";
-      const otherList = newTasks.filter((t) => t.status === otherStatus);
-
-      let finalTaskList = [];
-      let targetPointer = 0;
-      let otherPointer = 0;
-
-      tasks.forEach((task) => {
-        if (String(task.id) === String(sourceId)) {
-          return;
-        }
-
-        if (task.status === targetStatus) {
-          if (targetPointer < targetList.length) {
-            finalTaskList.push(targetList[targetPointer++]);
-          }
-        } else if (task.status === otherStatus) {
-          if (otherPointer < otherList.length) {
-            finalTaskList.push(otherList[otherPointer++]);
-          }
-        }
-      });
-
-      while (targetPointer < targetList.length) {
-        finalTaskList.push(targetList[targetPointer++]);
-      }
-
-      reorderTasks(finalTaskList);
+      const final = [...withoutSource];
+      final.splice(insertIndex, 0, updated);
+      reorderTasks(final);
     },
-    [tasks, reorderTasks]
+    [tasks, filter, reorderTasks]
   );
 
   return (
-    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-      {columnStatuses.map((colId) => (
-        <div
-          key={colId}
-          onDrop={(e) => handleDrop(e, colId, null)}
-          onDragOver={handleDragOver}
-          className="flex-1 min-h-[150px] p-4 rounded-lg bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700"
-        >
-          <h3
-            className={`text-xl font-bold mb-4 capitalize ${
-              colId === "pending"
-                ? "text-yellow-600 dark:text-yellow-400"
-                : "text-green-600 dark:text-green-400"
-            }`}
+    <>
+      <div className="flex gap-3 mb-4">
+        {["all", "pending", "completed"].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`
+              flex items-center gap-2
+              px-4 py-2 rounded-lg text-sm font-medium border transition-all
+              ${
+                filter === f
+                  ? "bg-brand-gradient text-white border-transparent shadow-md"
+                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-brand-500 hover:text-brand-600"
+              }
+            `}
           >
-            {colId} ({columns[colId].length})
-          </h3>
+            {filterIcons[f]}
+            {f.toUpperCase()}
+          </button>
+        ))}
+      </div>
 
-          <div className="min-h-[60px] space-y-4 p-1">
-            {columns[colId].length > 0 ? (
-              columns[colId].map((task) => (
-                <TaskItem
-                  key={String(task.id)}
-                  task={task}
-                  onToggle={() => toggleTask(task.id)}
-                  onDelete={() => deleteTask(task.id)}
-                  onDragStart={(e) => handleDragStart(e, task)}
-                  onDragEnter={(e) => handleDragEnter(e, task.id)}
-                  onDragLeave={() => setDragOverId(null)}
-                  onDrop={(e) => handleDrop(e, colId, task.id)}
-                  isDragging={String(draggedId) === String(task.id)}
-                  isOver={String(dragOverId) === String(task.id)}
-                />
-              ))
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 p-4 border border-dashed rounded-lg text-center">
-                No {colId} tasks yet! Drag tasks here.
-              </p>
+      <DragDropContext onDragEnd={onDragEnd}>
+        {filter === "all" ? (
+          <Droppable droppableId="all">
+            {(provided, snapshot) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className={`space-y-4 transition-all duration-300 ${
+                  snapshot.isDraggingOver ? "react-column-active" : ""
+                }`}
+              >
+                {columns.all.map((task, index) => (
+                  <Draggable key={task.id} draggableId={String(task.id)} index={index}>
+                    {(prov, snap) => (
+                      <div
+                        ref={prov.innerRef}
+                        {...prov.draggableProps}
+                        {...prov.dragHandleProps}
+                        className="react-draggable-item"
+                      >
+                        <TaskItem
+                          task={task}
+                          onToggle={() => toggleTask(task.id)}
+                          onDelete={() => deleteTask(task.id)}
+                          isDragging={snap.isDragging}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
             )}
+          </Droppable>
+        ) : (
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {["pending", "completed"].map((colId) => (
+              <Droppable key={colId} droppableId={colId}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`
+                      min-h-[150px] p-4 rounded-xl border shadow-md transition-all duration-300
+                      ${
+                        snapshot.isDraggingOver
+                          ? "react-column-active ring-2 ring-brand-400"
+                          : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                      }
+                    `}
+                  >
+                    <h3 className="text-xl font-bold mb-4 capitalize text-blue-600 dark:text-blue-400">
+                      {colId} ({columns[colId].length})
+                    </h3>
+
+                    <div className="space-y-4">
+                      {columns[colId].map((task, index) => (
+                        <Draggable key={task.id} draggableId={String(task.id)} index={index}>
+                          {(prov, snap) => (
+                            <div
+                              ref={prov.innerRef}
+                              {...prov.draggableProps}
+                              {...prov.dragHandleProps}
+                              className="react-draggable-item"
+                            >
+                              <TaskItem
+                                task={task}
+                                onToggle={() => toggleTask(task.id)}
+                                onDelete={() => deleteTask(task.id)}
+                                isDragging={snap.isDragging}
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+
+                      {provided.placeholder}
+
+                      {columns[colId].length === 0 && (
+                        <p className="text-gray-400 text-center border border-dashed p-4 rounded-lg">
+                          Drop here
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </Droppable>
+            ))}
           </div>
-        </div>
-      ))}
-    </div>
+        )}
+      </DragDropContext>
+    </>
   );
 }

@@ -6,7 +6,7 @@ export const ModalWrapper = ({ children, onClose }) => (
     onClick={onClose}
   >
     <div
-      className="relative w-full max-w-md max-h-[90vh] overflow-y-auto"
+      className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto"
       onClick={(e) => e.stopPropagation()}
     >
       {children}

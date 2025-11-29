@@ -9,3 +9,24 @@ html,body,#root { height: 100%; }
   animation: shimmer 1.2s linear infinite;
 }
 @keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+
+
+.react-draggable-item {
+  transition: transform 150ms ease-out;
+  will-change: transform;
+}
+
+.react-draggable-ghost {
+  opacity: 0.5;
+  transform: scale(1.05);
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
+}
+
+.react-column-active {
+  background: rgba(59,130,246,0.10); 
+  border-color: rgba(59,130,246,0.4);
+}
+
+.react-drop-placeholder {
+  transition: height 200ms cubic-bezier(0.25, 1, 0.5, 1);
+}
