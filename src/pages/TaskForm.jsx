@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import Card from "../components/ui/Card";
-import {TextInput} from "../components/ui/TextInput";
-import {TextArea} from "../components/ui/TextArea";
-import {StatusSelector} from "../components/ui/StatusSelector";
+import { TextInput } from "../components/ui/TextInput";
+import { TextArea } from "../components/ui/TextArea";
+import { StatusSelector } from "../components/ui/StatusSelector";
 import Button from "../components/Button";
-import {Toast} from "../components/Toast";
+import { Toast } from "../components/Toast";
 import { useTasks } from "../context/TaskProvider";
 
 export default function TaskForm({ editTask, onClose }) {
-  const { addTask, updateTask } = useTasks();
+  const { addTask, updateTask, tasks } = useTasks();
 
   const isEdit = Boolean(editTask);
 
@@ -19,10 +19,9 @@ export default function TaskForm({ editTask, onClose }) {
   });
 
   const [errors, setErrors] = useState({});
-  const [toast, setToast] = useState("");
+  const [toast, setToast] = useState({ message: "", type: "success" });
   const [loading, setLoading] = useState(false);
 
-  // Load edit task values
   useEffect(() => {
     if (isEdit && editTask) {
       setForm({
@@ -52,18 +51,30 @@ export default function TaskForm({ editTask, onClose }) {
     setLoading(true);
 
     try {
+      const duplicate = tasks.some(
+        (t) =>
+          t.title.trim().toLowerCase() === form.title.trim().toLowerCase() &&
+          (!isEdit || t.id !== editTask.id)
+      );
+
+      if (duplicate) {
+        setLoading(false);
+        setToast({ message: "Task with this title already exists", type: "error" });
+        return;
+      }
+
       if (isEdit) {
         updateTask({
           id: editTask.id,
           ...form,
         });
-        setToast("Task updated");
+        setToast({ message: "Task updated", type: "success" });
       } else {
         addTask({
           id: String(Date.now()),
           ...form,
         });
-        setToast("Task created");
+        setToast({ message: "Task created", type: "success" });
       }
 
       setTimeout(() => {
@@ -73,7 +84,7 @@ export default function TaskForm({ editTask, onClose }) {
     } catch (error) {
       console.error("Task save failed:", error);
       setLoading(false);
-      setToast("Failed to save task");
+      setToast({ message: "Failed to save task", type: "error" });
     }
   };
 
@@ -118,7 +129,11 @@ export default function TaskForm({ editTask, onClose }) {
         </div>
       </form>
 
-      <Toast message={toast} clear={() => setToast("")} />
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        clear={() => setToast({ message: "", type: "success" })}
+      />
     </Card>
   );
 }

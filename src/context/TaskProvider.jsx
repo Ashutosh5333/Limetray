@@ -1,26 +1,45 @@
-import { createContext, useContext, useCallback, useMemo, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useCallback,
+  useMemo,
+  useEffect,
+} from "react";
 import useLocalStorage from "../hooks/useLocalStorage";
 
 const TaskContext = createContext(null);
 export const useTasks = () => useContext(TaskContext);
 
-export  function TaskProvider({ children }) {
+export function TaskProvider({ children }) {
   const [tasks, setTasks] = useLocalStorage("tasks", [
-    { id: "1", title: "Design Landing Page", description: "Create mockups for the new website landing page.", status: "pending" },
-    { id: "2", title: "Setup Database", description: "Configure the Firestore database collections and rules.", status: "pending" },
-    { id: "3", title: "Refactor Authentication", description: "Update sign-in process to use custom token.", status: "completed" },
+    {
+      id: "1",
+      title: "Design Landing Page",
+      description: "Create mockups for the new website landing page.",
+      status: "pending",
+    },
+    {
+      id: "2",
+      title: "Setup Database",
+      description: "Configure the Firestore database collections and rules.",
+      status: "pending",
+    },
+    {
+      id: "3",
+      title: "Refactor Authentication",
+      description: "Update sign-in process to use custom token.",
+      status: "completed",
+    },
   ]);
-
-
 
   const addTask = useCallback(
     (task) => {
       const newTask = {
         ...task,
-        id: String(Date.now() + Math.random()), 
+        id: String(Date.now() + Math.random()),
         status: task.status || "pending",
       };
-      setTasks((prev) => [newTask, ...prev]); 
+      setTasks((prev) => [newTask, ...prev]);
     },
     [setTasks]
   );
@@ -29,7 +48,9 @@ export  function TaskProvider({ children }) {
     (updated) => {
       setTasks((prev) =>
         prev.map((t) =>
-          String(t.id) === String(updated.id) ? { ...updated, id: String(updated.id) } : t
+          String(t.id) === String(updated.id)
+            ? { ...updated, id: String(updated.id) }
+            : t
         )
       );
     },
@@ -79,5 +100,3 @@ export  function TaskProvider({ children }) {
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
 }
-
-
