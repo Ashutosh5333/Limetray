@@ -82,7 +82,7 @@ export default function TaskBoard() {
 
   return (
     <>
-      <div className="flex gap-3 mb-4">
+      <div className="w-full flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
         {["all", "pending", "completed"].map((f) => (
           <button
             key={f}
@@ -98,7 +98,8 @@ export default function TaskBoard() {
             `}
           >
             {filterIcons[f]}
-            {f.toUpperCase()}
+            {/* {f.toUpperCase()} */}
+            <span className="tracking-wide">{f.toUpperCase()}</span>
           </button>
         ))}
       </div>
